@@ -1,0 +1,20 @@
+[
+  {
+    "id": "YOUTUBE_PLAYLIST_ID_1",
+    "title": "Ambient",
+    "desc": "Calm background music for deep focus"
+  },
+  {
+    "id": "YOUTUBE_PLAYLIST_ID_2",
+    "title": "Lo-Fi",
+    "desc": {
+      "ko": "집중을 위한 로파이 음악",
+      "en": "Lo-fi beats to study and relax",
+      "ja": "集中のためのLoFiミュージック"
+    }
+  },
+  {
+    "id": "YOUTUBE_PLAYLIST_ID_3",
+    "title": "Jazz"
+  }
+]

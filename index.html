@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laser Focus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico">
+</head>
+<body>
+
+  <div id="app" class="flex h-screen overflow-hidden">
+
+    <!-- ========== LEFT SIDEBAR ========== -->
+    <aside id="sidebar" class="flex-shrink-0 border-r overflow-hidden" style="border-color: rgba(255,255,255,0.06)">
+
+      <!-- Sidebar Content (fixed-width inner, clipped by sidebar transition) -->
+      <div id="sidebar-inner" class="flex flex-col h-full">
+
+        <!-- App Title + Date -->
+        <div class="sidebar-header">
+          <div id="sidebar-title" class="sidebar-header-title"></div>
+          <div id="date-display" class="sidebar-header-date"></div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- YouTube Area -->
+        <div id="yt-area" class="mx-3 my-3 rounded-lg overflow-hidden flex-shrink-0" style="aspect-ratio: 16/9;">
+          <div id="yt-placeholder" class="yt-placeholder">
+            <span id="yt-brand-text" class="yt-brand-text"></span>
+          </div>
+          <div id="yt-player" class="hidden w-full h-full"></div>
+        </div>
+
+        <!-- Player Toolbar -->
+        <div class="yt-toolbar-box mx-3 mb-2">
+          <div class="yt-toolbar">
+            <div class="volume-control">
+              <button id="btn-volume" type="button" class="yt-icon-btn" onclick="toggleYtMute()" aria-label="Mute">
+                <svg id="icon-volume-on" class="yt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                </svg>
+                <svg id="icon-volume-off" class="yt-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              </button>
+              <input id="volume-slider" type="range" min="0" max="100" value="60"
+                class="volume-slider" oninput="setYtVolume(this.value)" aria-label="Volume" />
+            </div>
+            <button id="btn-playlist" onclick="openPlaylistModal()" class="playlist-btn">
+              PLAYLIST ↗
+            </button>
+          </div>
+        </div>
+
+        <!-- Completed Tasks -->
+        <div id="completed-section" class="completed-section hidden mx-3 mb-3">
+          <div class="sidebar-divider mb-3"></div>
+          <div class="completed-box">
+            <div class="completed-header">
+              <span id="txt-completed-header"></span>
+            </div>
+            <div id="completed-list" class="completed-list"></div>
+          </div>
+        </div>
+
+        <div class="flex-1"></div>
+
+        <!-- Reset Button -->
+        <div id="reset-area" class="px-3 pb-3 flex-shrink-0">
+          <div class="sidebar-divider mb-3"></div>
+          <button id="btn-reset" onclick="resetAllData()" class="reset-btn">
+            <span class="reset-icon">↺</span>
+            <span>RESET ALL DATA</span>
+          </button>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ========== MAIN AREA ========== -->
+    <main id="main" class="flex-1 flex items-center justify-center relative dot-bg overflow-hidden">
+
+      <!-- Mesh Background -->
+      <div class="mesh-bg" aria-hidden="true">
+        <div class="mesh-blob mb1"></div>
+        <div class="mesh-blob mb2"></div>
+        <div class="mesh-blob mb3"></div>
+        <div class="mesh-blob mb4"></div>
+      </div>
+
+      <!-- Toggle Button (always in main, never clipped by sidebar) -->
+      <button id="btn-toggle" onclick="toggleSidebar()" class="sidebar-toggle-btn" title="Toggle sidebar">
+        <span id="toggle-icon" class="eq-icon">
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+        </span>
+      </button>
+
+      <!-- ── INPUT VIEW ── -->
+      <div id="view-input" class="flex flex-col items-center w-full max-w-sm px-6" style="gap: 28px;">
+
+        <img id="app-logo" src="logo.png" alt="Laser Focus" class="app-logo-circle" />
+
+        <p id="txt-prompt" class="text-center" style="font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;"></p>
+
+        <!-- Task Name -->
+        <div class="w-full relative" style="padding-bottom: 20px;">
+          <input
+            id="task-input"
+            type="text"
+            maxlength="40"
+            autocomplete="off"
+            class="task-input w-full"
+          />
+          <span id="char-count" class="char-count">0/20</span>
+        </div>
+
+        <!-- Time Selector -->
+        <div class="w-full flex flex-col items-center" style="gap: 12px;">
+          <div class="flex items-center gap-4 w-full">
+            <input
+              id="time-slider"
+              type="range" min="10" max="60" value="25"
+              class="time-slider flex-1"
+              oninput="updateTimeDisplay(this.value)"
+            />
+            <div class="flex items-baseline gap-1" style="min-width: 52px; justify-content: flex-end;">
+              <span id="time-display" class="time-number">25</span>
+              <span id="txt-min" class="text-xs" style="color: #64748b;"></span>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="quick-btn" onclick="setTime(10)">10</button>
+            <button class="quick-btn" onclick="setTime(25)">25</button>
+            <button class="quick-btn" onclick="setTime(45)">45</button>
+            <button class="quick-btn" onclick="setTime(60)">60</button>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <button id="btn-start" onclick="startTask()" class="start-btn" style="margin-top: 20px;" disabled>
+          <span id="txt-start">LASER FOCUS START</span>
+        </button>
+
+      </div>
+
+      <p id="input-footer" class="input-footer"></p>
+
+      <!-- ── TIMER VIEW ── -->
+      <div id="view-timer" class="hidden flex-col items-center w-full px-10" style="gap: 20px;">
+
+        <!-- HERO: Task Name -->
+        <div id="timer-task-name" class="timer-task-name"></div>
+
+        <!-- Timer (subdued, supporting) -->
+        <div id="timer-display" class="timer-display">00:00</div>
+
+        <!-- Progress Bar -->
+        <div class="progress-track" style="width: 240px;">
+          <div id="progress-bar" class="progress-fill" style="width: 100%;"></div>
+        </div>
+
+        <p id="timer-action-prompt" class="timer-action-prompt hidden"></p>
+
+        <!-- Actions -->
+        <div class="flex gap-4 mt-2">
+          <button id="btn-complete" onclick="completeTask()" class="action-btn action-complete">
+            <span id="txt-complete"></span>
+          </button>
+          <button id="btn-stop" onclick="stopTask()" class="action-btn action-stop">
+            <span id="txt-stop"></span>
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== PLAYLIST MODAL ========== -->
+  <div id="modal-playlist" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="modal-backdrop" onclick="closePlaylistModal()"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="txt-modal-title" class="modal-title"></h2>
+        <button onclick="closePlaylistModal()" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="playlist-loading" class="text-center text-xs py-6" style="color: #475569;"></div>
+        <div id="playlist-error" class="hidden text-center text-xs py-6" style="color: rgba(239,68,68,0.7);"></div>
+        <div id="playlist-grid" class="playlist-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="script.js"></script>
+</body>
+</html>
