@@ -132,6 +132,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('.modal-body')?.addEventListener('scroll', hidePlTooltip);
   await loadRemotePlaylists();
   if (playlists.length > 0) selectPlaylist(playlists[0].id);
+
+  // Fallback: YT API already loaded but onYouTubeIframeAPIReady was missed
+  if (!ytPlayer && pendingVideoId && window.YT?.Player) {
+    ytApiReady = true;
+    createYTPlayer(pendingVideoId);
+    pendingVideoId = null;
+  }
 });
 
 // ── LANG ─────────────────────────────────────────────────────
