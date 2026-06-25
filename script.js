@@ -114,6 +114,12 @@ let volumeBeforeMute = CONFIG.defaultVolume;
 // ── DOM ──────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 
+// ── ANALYTICS ────────────────────────────────────────────────
+function gaEvent(name, params) {
+  if (typeof gtag !== 'function') return;
+  gtag('event', name, params);
+}
+
 // ── BOOT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   initLang();
@@ -222,6 +228,7 @@ function startTask() {
   $('reset-area').classList.add('hidden');
 
   timerInterval = setInterval(tick, 1000);
+  gaEvent('task_started', { task_name: taskName, target_min: targetSeconds / 60 });
 }
 
 function tick() {
@@ -284,6 +291,12 @@ function stopTask()     { finishTask('stopped'); }
 
 function finishTask(status) {
   clearInterval(timerInterval);
+  gaEvent('task_finished', {
+    task_name:   taskName,
+    target_min:  targetSeconds / 60,
+    elapsed_min: Math.round(elapsedSeconds / 60),
+    status,
+  });
   stopBeeping();
   document.body.classList.remove('time-up');
   sessionPhase = 'running';
@@ -512,6 +525,7 @@ function onYTStateChange(event) {
 
 function selectPlaylist(id) {
   closePlaylistModal();
+  gaEvent('playlist_selected', { playlist_id: id });
   if (!ytApiReady) { pendingVideoId = id; return; }
   if (!ytPlayer)   { createYTPlayer(id); }
   else             { ytPlayer.loadVideoById(id); }
